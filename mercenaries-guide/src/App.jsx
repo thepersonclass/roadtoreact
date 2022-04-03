@@ -1,8 +1,6 @@
 import './App.css';
 
-function App() {
-
-  return (
+const App = () => (
    <div>
     <h1>Mercenaries Titles</h1>
 
@@ -13,10 +11,9 @@ function App() {
      <List />
 
    </div>
-  );
-}
+);
 
-function List() {
+const List = () => {
 
   const list = [
     {
@@ -60,10 +57,10 @@ function List() {
       objectID: 4,
     }
   ];
-  
+
   return (
     <ul>
-       {list.map(function (item) {
+       {list.map((item) => {
          return (
           <li key={item.objectID}> 
             <span>
@@ -79,13 +76,11 @@ function List() {
   );
 }
 
-function Search() {
-  return (
+const Search = () => (
     <div>
       <label htmlFor="search">Search: </label>
       <input id="search" type="text" />  
     </div>
-  )
-}
+)
 
 export default App;
