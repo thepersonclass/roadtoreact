@@ -45,9 +45,13 @@ const App = () => {
     }
   ];
 
+  const [searchTerm, setSearchTerm] = React.useState('');
+
   const handleSearch = (event) => {
-    console.log(event.target.value);
+    setSearchTerm(event.target.value);
   }
+
+  const searchedGames = games.filter((game) => game.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
   return (
     <div>
@@ -57,7 +61,7 @@ const App = () => {
 
       <hr />
 
-      <List list={games}/>
+      <List list={searchedGames}/>
 
     </div>
   )
@@ -88,25 +92,12 @@ const Item = (props) => {
   );
 }
 
-const Search = (props) => {
-  const [searchTerm, setSearchTerm] = React.useState('');
+const Search = (props) => (
+  <div>
+    <label htmlFor="search">Search: </label>
+    <input id="search" type="text" onChange={props.onSearch} />  
+  </div>
+);
 
-  const handleChange = (event) => {
-    setSearchTerm(event.target.value);
-
-    props.onSearch(event);
-  }
-
-  return (
-    <div>
-      <label htmlFor="search">Search: </label>
-      <input id="search" type="text" onChange={handleChange} />  
-
-      <p>
-        Searching for <strong>{ searchTerm }</strong>
-      </p>
-    </div>
-  );
-}
 
 export default App;
