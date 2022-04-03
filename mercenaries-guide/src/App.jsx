@@ -1,21 +1,8 @@
 import './App.css';
 
-const App = () => (
-   <div>
-    <h1>Mercenaries Titles</h1>
+const App = () => {
 
-    <Search />
-
-     <hr />
-
-     <List />
-
-   </div>
-);
-
-const List = () => {
-
-  const list = [
+  const games = [
     {
       title: 'Mercenaries Saga: Will of the White Lions',
       url: 'https://www.nintendo.com/store/products/mercenaries-saga-chronicles-switch/',
@@ -59,20 +46,42 @@ const List = () => {
   ];
 
   return (
+    <div>
+      <h1>Mercenaries Titles</h1>
+
+      <Search />
+
+      <hr />
+
+      <List list={games}/>
+
+    </div>
+  )
+}
+
+const List = (props) => {
+
+  return (
     <ul>
-       {list.map((item) => {
+       {props.list.map((item) => {
          return (
-          <li key={item.objectID}> 
-            <span>
-              <a href={item.url}>{item.title}</a>
-            </span>
-            <span>{item.author}</span>
-            <span>{item.num_comments}</span>
-            <span>{item.points}</span>
-          </li>
-         );
+          <Item key={item.objectID} item={item} />
+        );
        })}
     </ul>
+  );
+}
+
+const Item = (props) => {
+  return (
+    <li> 
+      <span>
+        <a href={props.item.url}>{props.item.title}</a>
+      </span>
+      <span>{props.item.author}</span>
+      <span>{props.item.num_comments}</span>
+      <span>{props.item.points}</span>
+    </li>
   );
 }
 
