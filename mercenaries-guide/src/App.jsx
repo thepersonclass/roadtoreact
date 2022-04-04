@@ -14,7 +14,7 @@ const useSemiPersistentState = (key, initialState) => {
 };
 
 const App = () => {
-  const games = [
+  const gamesList = [
     {
       title: 'Mercenaries Saga: Will of the White Lions',
       url: 'https://www.nintendo.com/store/products/mercenaries-saga-chronicles-switch/',
@@ -59,8 +59,18 @@ const App = () => {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'mercenaries');
 
+  const [games, setGames] = React.useState(gamesList);
+
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
+  }
+
+  const handleRemoveGame = (item) => {
+    const newGame = games.filter(
+      (game) => item.objectID !== game.objectID
+    );
+
+    setGames(newGame);
   }
 
   const searchedGames = games.filter(({title}) => title.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -80,36 +90,43 @@ const App = () => {
 
       <hr />
 
-      <List list={searchedGames}/>
+      <List list={searchedGames} onRemoveItem={handleRemoveGame} />
 
     </div>
   )
 }
 
-const List = ({ list }) => {
+const List = ({ list, onRemoveItem }) => {
   return (
     <ul>
-       {list.map(({ objectID, ...item }) => {
+       {list.map((item) => {
          return (
-          <Item key={objectID} {...item} />
+          <Item 
+            key={item.objectID} 
+            item={item}
+            onRemoveItem={onRemoveItem} 
+          />
         );
        })}
     </ul>
   );
 }
 
-const Item = ({ title, url, author, num_comments, points }) => {
-  return (
-    <li> 
-      <span>
-        <a href={url}>{title}</a>
-      </span>
-      <span>{author}</span>
-      <span>{num_comments}</span>
-      <span>{points}</span>
-    </li>
-  );
-}
+const Item = ({ item, onRemoveItem }) => (
+  <li> 
+    <span>
+      <a href={item.url}>{item.title}</a>
+    </span>
+    <span>{item.author}</span>
+    <span>{item.num_comments}</span>
+    <span>{item.points}</span>
+    <span>
+      <button type="button" onClick={() => onRemoveItem(item)}>
+        Dismiss
+      </button>
+    </span>
+  </li>
+);
 
 const InputWithLabel = ({ 
   id, 
