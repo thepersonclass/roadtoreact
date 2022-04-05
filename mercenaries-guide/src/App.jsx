@@ -13,6 +13,22 @@ const useSemiPersistentState = (key, initialState) => {
   return [value, setValue];
 };
 
+const SET_GAMES = 'SET_GAMES';
+const REMOVE_GAME = 'REMOVE_GAME';
+
+const gamesReducer = (state, action) => {
+  switch (action.type) {
+    case SET_GAMES:
+      return action.payload;
+    case REMOVE_GAME:
+      return state.filter(
+        (game) => action.payload.objectID !== game.objectID
+      );
+    default:
+      throw new Error();
+  }
+}
+
 const App = () => {
 
   const initialGames = [ {
@@ -56,17 +72,9 @@ const App = () => {
     objectID: 4,
   }];
 
-  const [games, setGames] = React.useState([]);
+  const [games, dispatchGames] = React.useReducer(gamesReducer, []);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isError, setIsError] = React.useState(false);
-
-  getAsyncGames = () =>
-    new Promise((resolve) => 
-      setTimeout(
-        () => resolve({ data: { games: initialGames }}),
-        2000
-      )
-    );
 
   const getAsyncGames = () =>
     new Promise((resolve) => 
@@ -80,18 +88,20 @@ const App = () => {
     setIsLoading(true);
 
     getAsyncGames().then(result => {
-      setGames(result.data.games);
+      dispatchGames({
+        type: SET_GAMES,
+        payload: result.data.games,
+      });
       setIsLoading(false);
     })
     .catch(() => setIsError(true));
   }, []);
 
   const handleRemoveGame = (item) => {
-    const newGame = games.filter(
-      (game) => item.objectID !== game.objectID
-    );
-
-    setGames(newGame);
+    dispatchGames({
+      type: REMOVE_GAME,
+      payload: item,
+    });
   }
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'mercenaries');
