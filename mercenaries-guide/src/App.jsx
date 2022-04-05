@@ -57,6 +57,16 @@ const App = () => {
   }];
 
   const [games, setGames] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isError, setIsError] = React.useState(false);
+
+  getAsyncGames = () =>
+    new Promise((resolve) => 
+      setTimeout(
+        () => resolve({ data: { games: initialGames }}),
+        2000
+      )
+    );
 
   const getAsyncGames = () =>
     new Promise((resolve) => 
@@ -67,10 +77,14 @@ const App = () => {
   );
 
   React.useEffect(() => {
+    setIsLoading(true);
+
     getAsyncGames().then(result => {
       setGames(result.data.games);
+      setIsLoading(false);
     })
-  });
+    .catch(() => setIsError(true));
+  }, []);
 
   const handleRemoveGame = (item) => {
     const newGame = games.filter(
@@ -103,7 +117,16 @@ const App = () => {
 
       <hr />
 
-      <List list={searchedGames} onRemoveItem={handleRemoveGame} />
+      {isError && <p>Something went wrong...</p>}
+
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <List 
+          list={searchedGames} 
+          onRemoveItem={handleRemoveGame} 
+        />
+      )}
 
     </div>
   )
