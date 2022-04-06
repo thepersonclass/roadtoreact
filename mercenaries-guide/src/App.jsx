@@ -13,17 +13,36 @@ const useSemiPersistentState = (key, initialState) => {
   return [value, setValue];
 };
 
-const SET_GAMES = 'SET_GAMES';
 const REMOVE_GAME = 'REMOVE_GAME';
 
 const gamesReducer = (state, action) => {
   switch (action.type) {
-    case SET_GAMES:
-      return action.payload;
-    case REMOVE_GAME:
-      return state.filter(
-        (game) => action.payload.objectID !== game.objectID
-      );
+    case 'STORIES_FETCH_INIT':
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+    case 'STORIES_FETCH_SUCCESS':
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+        data: action.payload,
+      };
+    case 'STORIES_FETCH_FAILURE':
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+      };
+    case 'REMOVE_STORY':
+      return {
+        ...state,
+        data: state.data.filter(
+          (game) => action.payload.objectID !== game.objectID
+        ),
+      };
     default:
       throw new Error();
   }
@@ -72,9 +91,10 @@ const App = () => {
     objectID: 4,
   }];
 
-  const [games, dispatchGames] = React.useReducer(gamesReducer, []);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isError, setIsError] = React.useState(false);
+  const [games, dispatchGames] = React.useReducer(
+    gamesReducer,
+    { data: [], isLoading: false, isError: false }
+  );
 
   const getAsyncGames = () =>
     new Promise((resolve) => 
@@ -85,16 +105,17 @@ const App = () => {
   );
 
   React.useEffect(() => {
-    setIsLoading(true);
+    dispatchGames({ type: 'STORIES_FETCH_INIT' });
 
-    getAsyncGames().then(result => {
-      dispatchGames({
-        type: SET_GAMES,
-        payload: result.data.games,
-      });
-      setIsLoading(false);
+    getAsyncGames()
+      .then(result => {
+        dispatchGames({
+          type: 'STORIES_FETCH_SUCCESS',
+          payload: result.data.games,
+        });
     })
-    .catch(() => setIsError(true));
+    .catch(() => 
+      dispatchGames({ type: 'STORIES_FETCH_FAILURE' }));
   }, []);
 
   const handleRemoveGame = (item) => {
@@ -106,7 +127,7 @@ const App = () => {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'mercenaries');
   
-  const searchedGames = games.filter(({title}) => title.toLowerCase().includes(searchTerm.toLowerCase()))
+  const searchedGames = games.data.filter((game) => game.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -127,9 +148,9 @@ const App = () => {
 
       <hr />
 
-      {isError && <p>Something went wrong...</p>}
+      {games.isError && <p>Something went wrong...</p>}
 
-      {isLoading ? (
+      {games.isLoading ? (
         <p>Loading...</p>
       ) : (
         <List 
