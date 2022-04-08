@@ -17,30 +17,30 @@ const REMOVE_GAME = 'REMOVE_GAME';
 
 const gamesReducer = (state, action) => {
   switch (action.type) {
-    case 'STORIES_FETCH_INIT':
+    case 'GAMES_FETCH_INIT':
       return {
         ...state,
         isLoading: true,
         isError: false,
       };
-    case 'STORIES_FETCH_SUCCESS':
+    case 'GAMES_FETCH_SUCCESS':
       return {
         ...state,
         isLoading: false,
         isError: false,
         data: action.payload,
       };
-    case 'STORIES_FETCH_FAILURE':
+    case 'GAMES_FETCH_FAILURE':
       return {
         ...state,
         isLoading: false,
         isError: true,
       };
-    case 'REMOVE_STORY':
+    case REMOVE_GAME:
       return {
         ...state,
         data: state.data.filter(
-          (game) => action.payload.objectID !== game.objectID
+          (game) => action.payload.nsuid_na !== game.nsuid_na
         ),
       };
     default:
@@ -48,75 +48,29 @@ const gamesReducer = (state, action) => {
   }
 }
 
-const App = () => {
+const API_ENDPOINT = 'http://localhost:3000/data/content.json'
 
-  const initialGames = [ {
-    title: 'Mercenaries Saga: Will of the White Lions',
-    url: 'https://www.nintendo.com/store/products/mercenaries-saga-chronicles-switch/',
-    publisher: 'Circle Ent.',
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: 'Mercenaries Saga 2: Order of the Silver Eagle',
-    url: 'https://www.nintendo.com/store/products/mercenaries-saga-chronicles-switch/',
-    publisher: 'Circle Ent.',
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-  {
-    title: 'Mercenaries Saga 3: Gray Wolves of War',
-    url: 'https://www.nintendo.com/store/products/mercenaries-saga-chronicles-switch/',
-    publisher: 'Circle Ent.',
-    num_comments: 2,
-    points: 5,
-    objectID: 2,
-  },
-  {
-    title: 'Mercenaries Blaze: Dawn of the Twin Dragons',
-    url: 'https://www.nintendo.com/store/products/mercenaries-blaze-dawn-of-the-twin-dragons-switch/?sid=164a9ed8cd472b0c3becf62dfeacf67e__ga',
-    publisher: 'Circle Ent.',
-    num_comments: 2,
-    points: 7,
-    objectID: 3,
-  },
-  {
-    title: 'Mercenaries Rebirth: Call of the Wild Lynx',
-    url: 'https://www.nintendo.com/store/products/mercenaries-rebirth-call-of-the-wild-lynx-switch/?sid=9e76add5afc193e4eeb6755d5ffe9def__ga',
-    publisher: 'Circle Ent.',
-    num_comments: 2,
-    points: 8,
-    objectID: 4,
-  }];
+const App = () => {
 
   const [games, dispatchGames] = React.useReducer(
     gamesReducer,
     { data: [], isLoading: false, isError: false }
   );
 
-  const getAsyncGames = () =>
-    new Promise((resolve) => 
-      setTimeout(
-        () => resolve({ data: { games: initialGames }}),
-        2000
-      )
-  );
-
   React.useEffect(() => {
-    dispatchGames({ type: 'STORIES_FETCH_INIT' });
+    dispatchGames({ type: 'GAMES_FETCH_INIT' });
 
-    getAsyncGames()
-      .then(result => {
+    fetch(`${API_ENDPOINT}`)
+      .then((response) => response.json())
+      .then((result) => {
         dispatchGames({
-          type: 'STORIES_FETCH_SUCCESS',
-          payload: result.data.games,
-        });
-    })
-    .catch(() => 
-      dispatchGames({ type: 'STORIES_FETCH_FAILURE' }));
-  }, []);
+          type: 'GAMES_FETCH_SUCCESS',
+          payload: result.rows
+        })
+      })
+      .catch(() => 
+        dispatchGames({ type: 'GAMES_FETCH_FAILURE' }));
+    }, []);
 
   const handleRemoveGame = (item) => {
     dispatchGames({
@@ -169,7 +123,7 @@ const List = ({ list, onRemoveItem }) => {
        {list.map((item) => {
          return (
           <Item 
-            key={item.objectID} 
+            key={item.nsuid_na} 
             item={item}
             onRemoveItem={onRemoveItem} 
           />
@@ -181,12 +135,8 @@ const List = ({ list, onRemoveItem }) => {
 
 const Item = ({ item, onRemoveItem }) => (
   <li> 
-    <span>
-      <a href={item.url}>{item.title}</a>
-    </span>
-    <span>{item.author}</span>
-    <span>{item.num_comments}</span>
-    <span>{item.points}</span>
+    <span>Title: {item.title}</span>
+    <span>Price: {item.eshop_list_price_na}</span>
     <span>
       <button type="button" onClick={() => onRemoveItem(item)}>
         Dismiss
