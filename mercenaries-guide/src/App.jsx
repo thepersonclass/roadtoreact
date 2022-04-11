@@ -57,20 +57,22 @@ const App = () => {
     { data: [], isLoading: false, isError: false }
   );
 
+  const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'mercenaries');
+
   React.useEffect(() => {
-    dispatchGames({ type: 'GAMES_FETCH_INIT' });
+    if (!searchTerm) return;
 
     fetch(`${API_ENDPOINT}`)
       .then((response) => response.json())
       .then((result) => {
         dispatchGames({
           type: 'GAMES_FETCH_SUCCESS',
-          payload: result.rows
+          payload: result.rows.filter((game) => game.title.toLowerCase().includes(searchTerm.toLowerCase())),
         })
       })
       .catch(() => 
         dispatchGames({ type: 'GAMES_FETCH_FAILURE' }));
-    }, []);
+    }, [searchTerm]);
 
   const handleRemoveGame = (item) => {
     dispatchGames({
@@ -78,10 +80,6 @@ const App = () => {
       payload: item,
     });
   }
-
-  const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'mercenaries');
-  
-  const searchedGames = games.data.filter((game) => game.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -108,7 +106,7 @@ const App = () => {
         <p>Loading...</p>
       ) : (
         <List 
-          list={searchedGames} 
+          list={games.data} 
           onRemoveItem={handleRemoveGame} 
         />
       )}
@@ -123,7 +121,6 @@ const List = ({ list, onRemoveItem }) => {
        {list.map((item) => {
          return (
           <Item 
-            key={item.nsuid_na} 
             item={item}
             onRemoveItem={onRemoveItem} 
           />
