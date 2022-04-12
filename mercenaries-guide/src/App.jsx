@@ -59,7 +59,7 @@ const App = () => {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'mercenaries');
 
-  React.useEffect(() => {
+  const handleFetchStories = React.useCallback(() => {
     if (!searchTerm) return;
 
     fetch(`${API_ENDPOINT}`)
@@ -71,8 +71,12 @@ const App = () => {
         })
       })
       .catch(() => 
-        dispatchGames({ type: 'GAMES_FETCH_FAILURE' }));
-    }, [searchTerm]);
+        dispatchGames({ type: 'GAMES_FETCH_FAILURE' }))
+  }, [searchTerm]);
+
+  React.useEffect(() => {
+    handleFetchStories();
+  }, [handleFetchStories]);
 
   const handleRemoveGame = (item) => {
     dispatchGames({
