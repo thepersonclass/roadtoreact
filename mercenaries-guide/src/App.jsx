@@ -48,7 +48,7 @@ const gamesReducer = (state, action) => {
   }
 }
 
-const API_ENDPOINT = 'http://localhost:3000/data/content.json'
+const API_ENDPOINT = 'https://localhost:7054/games?title='
 
 const App = () => {
 
@@ -59,20 +59,34 @@ const App = () => {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'mercenaries');
 
+  const [url, setUrl] = React.useState(
+    `${API_ENDPOINT}${searchTerm}`
+  );
+
+  const handleSearchInput = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    setUrl(`${API_ENDPOINT}${searchTerm}`);
+  };
+
   const handleFetchStories = React.useCallback(() => {
     if (!searchTerm) return;
 
-    fetch(`${API_ENDPOINT}`)
+    dispatchGames({ type: 'GAMES_FETCH_INIT'});
+
+    fetch(url)
       .then((response) => response.json())
       .then((result) => {
         dispatchGames({
           type: 'GAMES_FETCH_SUCCESS',
-          payload: result.rows.filter((game) => game.title.toLowerCase().includes(searchTerm.toLowerCase())),
+          payload: result,
         })
       })
       .catch(() => 
         dispatchGames({ type: 'GAMES_FETCH_FAILURE' }))
-  }, [searchTerm]);
+  }, [url]);
 
   React.useEffect(() => {
     handleFetchStories();
@@ -85,10 +99,6 @@ const App = () => {
     });
   }
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-  }
-
   return (
     <div>
       <h1>Mercenaries Titles</h1>
@@ -96,11 +106,19 @@ const App = () => {
       <InputWithLabel
        id="search"
        value={searchTerm} 
-       onInputChange={handleSearch} 
+       onInputChange={handleSearchInput} 
        isFocused
       >
         <strong>Search:</strong>
       </InputWithLabel>
+
+      <button 
+        type="button"
+        disabled={!searchTerm}
+        onClick={handleSearchSubmit}
+      >
+        Submit
+      </button>
 
       <hr />
 
