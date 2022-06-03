@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import './App.css';
 
 const useSemiPersistentState = (key, initialState) => {
@@ -72,20 +73,19 @@ const App = () => {
   };
 
   const handleFetchStories = React.useCallback(() => {
-    if (!searchTerm) return;
-
     dispatchGames({ type: 'GAMES_FETCH_INIT'});
 
-    fetch(url)
-      .then((response) => response.json())
+    axios
+      .get(url)
       .then((result) => {
         dispatchGames({
           type: 'GAMES_FETCH_SUCCESS',
-          payload: result,
-        })
+          payload: result.data,
+        });
       })
       .catch(() => 
-        dispatchGames({ type: 'GAMES_FETCH_FAILURE' }))
+        dispatchGames({ type: 'GAMES_FETCH_FAILURE' })
+      );
   }, [url]);
 
   React.useEffect(() => {
