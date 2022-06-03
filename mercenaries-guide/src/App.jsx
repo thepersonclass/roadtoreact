@@ -68,24 +68,26 @@ const App = () => {
     setSearchTerm(event.target.value);
   };
 
-  const handleSearchSubmit = () => {
+  const handleSearchSubmit = (event) => {
     setUrl(`${API_ENDPOINT}${searchTerm}`);
+
+    event.preventDefault();
   };
 
-  const handleFetchStories = React.useCallback(() => {
+  const handleFetchStories = React.useCallback(async () => {
     dispatchGames({ type: 'GAMES_FETCH_INIT'});
 
-    axios
-      .get(url)
-      .then((result) => {
-        dispatchGames({
-          type: 'GAMES_FETCH_SUCCESS',
-          payload: result.data,
-        });
-      })
-      .catch(() => 
-        dispatchGames({ type: 'GAMES_FETCH_FAILURE' })
-      );
+    try {
+      const result = await axios.get(url);
+
+      dispatchGames({
+        type: 'GAMES_FETCH_SUCCESS',
+        payload: result.data,
+      });
+    }
+    catch {
+      dispatchGames({ type: 'STORIES_FETCH_FAILURE' });
+    }
   }, [url]);
 
   React.useEffect(() => {
@@ -103,23 +105,12 @@ const App = () => {
     <div>
       <h1>Mercenaries Titles</h1>
 
-      <InputWithLabel
-       id="search"
-       value={searchTerm} 
-       onInputChange={handleSearchInput} 
-       isFocused
-      >
-        <strong>Search:</strong>
-      </InputWithLabel>
-
-      <button 
-        type="button"
-        disabled={!searchTerm}
-        onClick={handleSearchSubmit}
-      >
-        Submit
-      </button>
-
+      <SearchForm
+        searchTerm={searchTerm}
+        onSearchInput={handleSearchInput}
+        onSearchSubmit={handleSearchSubmit}
+      />
+      
       <hr />
 
       {games.isError && <p>Something went wrong...</p>}
@@ -193,6 +184,27 @@ const InputWithLabel = ({
     </>
   );
 };
+
+const SearchForm = ({
+  searchTerm,
+  onSearchInput,
+  onSearchSubmit,
+}) => (
+  <form onSubmit={onSearchSubmit}>
+    <InputWithLabel
+      id="search"
+      value={searchTerm}
+      isFocused
+      onInputChange={onSearchInput}
+    >
+      <strong>Search:</strong>
+    </InputWithLabel>
+
+    <button type="submit" disabled={!searchTerm}>
+      Submit
+    </button>
+  </form>
+)
 
 
 export default App;
