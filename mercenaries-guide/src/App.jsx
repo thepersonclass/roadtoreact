@@ -57,7 +57,7 @@ const App = () => {
     gamesReducer,
     { data: [], isLoading: false, isError: false }
   );
-
+  
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'mercenaries');
 
   const [url, setUrl] = React.useState(
@@ -102,16 +102,14 @@ const App = () => {
   }
 
   return (
-    <div>
-      <h1>Mercenaries Titles</h1>
+    <div className="container">
+      <h1 className="headline-primary">Mercenaries Titles</h1>
 
       <SearchForm
         searchTerm={searchTerm}
         onSearchInput={handleSearchInput}
         onSearchSubmit={handleSearchSubmit}
       />
-      
-      <hr />
 
       {games.isError && <p>Something went wrong...</p>}
 
@@ -144,11 +142,15 @@ const List = ({ list, onRemoveItem }) => {
 }
 
 const Item = ({ item, onRemoveItem }) => (
-  <li> 
-    <span>Title: {item.title}</span>
-    <span>Price: {item.eshop_list_price_na}</span>
+  <li className="item"> 
+    <span style={{ width: '40%' }}>Title: {item.title}</span>
+    <span style={{ width: '30%' }}>Price: {item.eshop_list_price_na}</span>
     <span>
-      <button type="button" onClick={() => onRemoveItem(item)}>
+      <button 
+        type="button" 
+        onClick={() => onRemoveItem(item)}
+        className="button button_small"
+      >
         Dismiss
       </button>
     </span>
@@ -173,14 +175,16 @@ const InputWithLabel = ({
 
   return (
     <>
-      <label htmlFor={id}>{children}</label>
+      <label htmlFor={id} className="label">{children}</label>
       &nbsp;
       <input 
         ref={inputRef}
         id={id}
         type={type} 
         value={value}
-        onChange={onInputChange} />  
+        onChange={onInputChange}
+        className="input" 
+      />  
     </>
   );
 };
@@ -190,7 +194,7 @@ const SearchForm = ({
   onSearchInput,
   onSearchSubmit,
 }) => (
-  <form onSubmit={onSearchSubmit}>
+  <form onSubmit={onSearchSubmit} className="search-form">
     <InputWithLabel
       id="search"
       value={searchTerm}
@@ -200,7 +204,11 @@ const SearchForm = ({
       <strong>Search:</strong>
     </InputWithLabel>
 
-    <button type="submit" disabled={!searchTerm}>
+    <button 
+      type="submit" 
+      disabled={!searchTerm}
+      className="button button_large"
+    >
       Submit
     </button>
   </form>
